@@ -12,15 +12,17 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.net.URL
 
 class MainActivity : AppCompatActivity() {
-    private val MAIN_ACTIVITY="MAIN_ACTIVITY"
+    private val MAIN_ACTIVITY = "MAIN_ACTIVITY"
     private var downloadData: DownloadData? = null
+    private var feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml"
+    private var feedLimit = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(MAIN_ACTIVITY,"onCreate called")
+        Log.d(MAIN_ACTIVITY, "onCreate called")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        downloadUrl("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
+        downloadUrl(feedUrl.format(feedLimit))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -29,18 +31,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val feedUrl = when (item.itemId) {
-            R.id.mnuFree -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml"
-            R.id.mnuPaid -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=10/xml"
-            R.id.mnuSongs -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml"
+        when (item.itemId) {
+            R.id.mnuFree -> feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml"
+            R.id.mnuPaid -> feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=%d/xml"
+            R.id.mnuSongs -> feedUrl = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=%d/xml"
+            R.id.mnu10, R.id.mnu25 -> if (!item.isChecked) {
+                item.isChecked = true
+                feedLimit = 35 - feedLimit
+//                Log.d(MAIN_ACTIVITY,"feedLimit changed")
+            }
+            R.id.mnuRefresh-> {
+                downloadUrl(feedUrl.format(feedLimit))
+                Log.d(MAIN_ACTIVITY,"refreshed page")
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
-        downloadUrl(feedUrl)
+        downloadUrl(feedUrl.format(feedLimit))
         return true
     }
 
     override fun onDestroy() {
-        Log.d(MAIN_ACTIVITY,"onDestroy called")
+        Log.d(MAIN_ACTIVITY, "onDestroy called")
         super.onDestroy()
         downloadData?.cancel(true)
     }
@@ -100,4 +112,3 @@ class FeedEntry {
             """.trimIndent()
     }
 }
-
