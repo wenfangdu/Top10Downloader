@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.mnuRefresh-> {
                 downloadUrl(feedUrl.format(feedLimit))
-                Log.d(MAIN_ACTIVITY,"refreshed page")
+//                Log.d(MAIN_ACTIVITY,"refreshed page")
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
